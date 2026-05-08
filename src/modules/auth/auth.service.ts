@@ -38,6 +38,60 @@ export class AuthService {
     return { user, token };
   }
 
+  async forgotPassword(phone: string) {
+    const user = await this.usersService.findByPhone(phone);
+    
+    if (!user) {
+      throw new UnauthorizedException('Phone number not found');
+    }
+
+    // Generate 6-digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Set expiry to 15 minutes from now
+    const resetCodeExpiry = new Date();
+    resetCodeExpiry.setMinutes(resetCodeExpiry.getMinutes() + 15);
+
+    // Save reset code to user
+    await this.usersService.updateResetCode(user.id, resetCode, resetCodeExpiry);
+
+    // In production, send SMS here
+    // For now, return the code (remove this in production!)
+    return { 
+      message: 'Reset code generated',
+      code: resetCode, // Remove this in production
+      expiresIn: '15 minutes'
+    };
+  }
+
+  async resetPassword(phone: string, code: string, newPassword: string) {
+    const user = await this.usersService.findByPhone(phone);
+    
+    if (!user) {
+      throw new UnauthorizedException('Phone number not found');
+    }
+
+    if (!user.resetCode || !user.resetCodeExpiry) {
+      throw new UnauthorizedException('No reset code found. Please request a new one.');
+    }
+
+    if (user.resetCode !== code) {
+      throw new UnauthorizedException('Invalid reset code');
+    }
+
+    if (new Date() > user.resetCodeExpiry) {
+      throw new UnauthorizedException('Reset code has expired. Please request a new one.');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear reset code
+    await this.usersService.updatePassword(user.id, hashedPassword);
+
+    return { message: 'Password reset successfully' };
+  }
+
   private generateToken(user: any) {
     const payload = {
       sub: user.id,

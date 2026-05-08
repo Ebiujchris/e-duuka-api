@@ -91,4 +91,16 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
+
+  async updateResetCode(id: string, resetCode: string, resetCodeExpiry: Date): Promise<void> {
+    await this.userRepository.update(id, { resetCode, resetCodeExpiry });
+  }
+
+  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    await this.userRepository.update(id, { 
+      password: hashedPassword,
+      resetCode: null,
+      resetCodeExpiry: null
+    });
+  }
 }

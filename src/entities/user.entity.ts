@@ -24,6 +24,12 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ nullable: true })
+  resetCode?: string;
+
+  @Column({ nullable: true })
+  resetCodeExpiry?: Date;
+
   @ManyToOne(() => Shop, shop => shop.users)
   shop: Shop;
 
