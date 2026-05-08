@@ -55,10 +55,10 @@ export class AuthService {
     // Save reset code to user
     await this.usersService.updateResetCode(user.id, resetCode, resetCodeExpiry);
 
-    // In production, send SMS here
+    // In production, send SMS here using Africa's Talking or similar service
     // For now, return the code (remove this in production!)
     return { 
-      message: 'Reset code generated',
+      message: 'Reset code generated successfully',
       code: resetCode, // Remove this in production
       expiresIn: '15 minutes'
     };
