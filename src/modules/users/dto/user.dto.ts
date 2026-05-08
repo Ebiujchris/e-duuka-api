@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsPhoneNumber, IsBoolean, IsUUID, IsDecimal } from 'class-validator';
+import { IsString, IsOptional, IsPhoneNumber, IsBoolean, IsUUID, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
   @IsPhoneNumber('UG')
@@ -28,7 +28,7 @@ export class CreateUserDto {
   shopLocation?: string;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber()
   shopInitialCapital?: number;
 }
 
