@@ -99,8 +99,8 @@ export class UsersService {
   async updatePassword(id: string, hashedPassword: string): Promise<void> {
     await this.userRepository.update(id, { 
       password: hashedPassword,
-      resetCode: null,
-      resetCodeExpiry: null
+      resetCode: undefined,
+      resetCodeExpiry: undefined
     });
   }
 }
