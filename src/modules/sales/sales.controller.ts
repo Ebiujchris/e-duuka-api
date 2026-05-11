@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { SalesService } from './sales.service';
-import { CreateSaleDto, UpdateSaleDto } from './dto/sale.dto';
+import { CreateSaleDto, UpdateSaleDto, VoidSaleDto } from './dto/sale.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('sales')
@@ -52,6 +52,15 @@ export class SalesController {
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.salesService.findOne(id, req.user.shopId);
+  }
+
+  @Post(':id/void')
+  voidSale(
+    @Param('id') id: string,
+    @Body() voidSaleDto: VoidSaleDto,
+    @Req() req: any,
+  ) {
+    return this.salesService.voidSale(id, req.user.shopId, req.user.userId, voidSaleDto);
   }
 
   @Patch(':id')

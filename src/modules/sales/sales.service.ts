@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { Sale } from '../../entities/sale.entity';
+import { Sale, SaleStatus } from '../../entities/sale.entity';
 import { Credit } from '../../entities/credit.entity';
 import { ProductsService } from '../products/products.service';
-import { CreateSaleDto, UpdateSaleDto } from './dto/sale.dto';
+import { CreateSaleDto, UpdateSaleDto, VoidSaleDto } from './dto/sale.dto';
 
 @Injectable()
 export class SalesService {
@@ -131,5 +131,32 @@ export class SalesService {
     if (result.affected === 0) {
       throw new NotFoundException(`Sale with ID ${id} not found`);
     }
+  }
+
+  async voidSale(id: string, shopId: string, userId: string, voidSaleDto: VoidSaleDto): Promise<Sale> {
+    const sale = await this.findOne(id, shopId);
+    
+    if (sale.status === SaleStatus.VOIDED) {
+      throw new BadRequestException('Sale is already voided');
+    }
+
+    // Restore stock
+    const product = await this.productsService.findOne(sale.productId, shopId);
+    await this.productsService.updateStock(
+      sale.productId,
+      shopId,
+      -sale.quantity // Negative to add back to stock
+    );
+
+    // Update sale status
+    sale.status = SaleStatus.VOIDED;
+    sale.voidReason = voidSaleDto.reason;
+    sale.voidedBy = userId;
+    sale.voidedAt = new Date();
+    if (voidSaleDto.notes) {
+      sale.notes = voidSaleDto.notes;
+    }
+
+    return await this.saleRepository.save(sale);
   }
 }

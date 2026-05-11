@@ -1,5 +1,5 @@
 import { IsString, IsNumber, IsOptional, IsEnum, Min } from 'class-validator';
-import { PaymentType } from '../../../entities/sale.entity';
+import { PaymentType, VoidReason } from '../../../entities/sale.entity';
 
 export class CreateSaleDto {
   @IsString()
@@ -58,6 +58,15 @@ export class UpdateSaleDto {
   @IsOptional()
   @IsString()
   customerPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+export class VoidSaleDto {
+  @IsEnum(VoidReason)
+  reason: VoidReason;
 
   @IsOptional()
   @IsString()

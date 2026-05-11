@@ -9,6 +9,19 @@ export enum PaymentType {
   MOBILE_MONEY = 'mobile_money'
 }
 
+export enum SaleStatus {
+  ACTIVE = 'active',
+  VOIDED = 'voided'
+}
+
+export enum VoidReason {
+  WRONG_AMOUNT = 'wrong_amount',
+  WRONG_PRODUCT = 'wrong_product',
+  CUSTOMER_RETURN = 'customer_return',
+  DUPLICATE_ENTRY = 'duplicate_entry',
+  OTHER = 'other'
+}
+
 @Entity('sales')
 export class Sale {
   @PrimaryGeneratedColumn('uuid')
@@ -38,6 +51,21 @@ export class Sale {
 
   @Column({ nullable: true })
   notes?: string;
+
+  @Column({
+    type: 'varchar',
+    default: SaleStatus.ACTIVE
+  })
+  status: SaleStatus;
+
+  @Column({ nullable: true })
+  voidReason?: string;
+
+  @Column({ nullable: true })
+  voidedBy?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  voidedAt?: Date;
 
   @ManyToOne(() => Shop, shop => shop.sales)
   shop: Shop;
