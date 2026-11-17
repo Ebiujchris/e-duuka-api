@@ -30,7 +30,7 @@ import { ExpensesModule } from './modules/expenses/expenses.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/',
-      exclude: ['/api*', '/health'],
+      exclude: ['/api/*path', '/health'],
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
