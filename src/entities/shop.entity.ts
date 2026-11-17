@@ -24,7 +24,7 @@ export class Shop {
   region?: string;
 
   @Column({ nullable: true })
-  phone?: string;
+  phone?: string | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   initialCapital: number;

@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../entities/user.entity';
 import { Shop } from '../../entities/shop.entity';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { UpdateShopDto } from './dto/update-shop.dto';
 
 @Injectable()
 export class UsersService {
@@ -71,6 +72,46 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async findCurrentUser(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['shop'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const { password: _password, resetCode: _resetCode, resetCodeExpiry: _resetCodeExpiry, ...safeUser } = user;
+    return safeUser as User;
+  }
+
+  async updateShopForUser(userId: string, shopId: string, updateShopDto: UpdateShopDto): Promise<Shop> {
+    const user = await this.userRepository.findOneBy({ id: userId, shopId });
+    if (!user) {
+      throw new ForbiddenException('You can only update your own shop details');
+    }
+
+    const shop = await this.shopRepository.findOneBy({ id: shopId });
+    if (!shop) {
+      throw new NotFoundException(`Shop with ID ${shopId} not found`);
+    }
+
+    if (updateShopDto.name !== undefined) {
+      const name = updateShopDto.name.trim();
+      if (!name) throw new BadRequestException('Shop name cannot be empty');
+      shop.name = name;
+    }
+    if (updateShopDto.location !== undefined) {
+      const location = updateShopDto.location.trim();
+      if (!location) throw new BadRequestException('Shop location cannot be empty');
+      shop.location = location;
+    }
+    if (updateShopDto.phone !== undefined) shop.phone = updateShopDto.phone?.trim() || null;
+
+    return this.shopRepository.save(shop);
   }
 
   async findByPhone(phone: string): Promise<User | null> {
