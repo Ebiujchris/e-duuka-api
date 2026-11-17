@@ -109,7 +109,7 @@ export class UsersService {
       if (!location) throw new BadRequestException('Shop location cannot be empty');
       shop.location = location;
     }
-    if (updateShopDto.phone !== undefined) shop.phone = updateShopDto.phone?.trim() || null;
+    if (updateShopDto.phone !== undefined) shop.phone = updateShopDto.phone?.trim() || '';
 
     return this.shopRepository.save(shop);
   }
